@@ -1,46 +1,73 @@
+version: '4'
+
 services:
-    laravel.test:
-        build:
-            context: './vendor/laravel/sail/runtimes/8.4'
-            dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
-        image: 'sail-8.4/app'
-        extra_hosts:
-            - 'host.docker.internal:host-gateway'
-        ports:
-            - '${APP_PORT:-80}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-            IGNITION_LOCAL_SITES_PATH: '${PWD}'
-        volumes:
-            - '.:/var/www/html'
-        networks:
-            - sail
-        depends_on:
-            - redis
-    redis:
-        image: 'redis:alpine'
-        ports:
-            - '${FORWARD_REDIS_PORT:-6379}:6379'
-        volumes:
-            - 'sail-redis:/data'
-        networks:
-            - sail
-        healthcheck:
-            test:
-                - CMD
-                - redis-cli
-                - ping
-            retries: 3
-            timeout: 5s
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www
+    networks:
+      - app-network
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+    deploy:
+      replicas: 2  # Para escalar la API si es necesario
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - php
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: redis_dm
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: ["php", "artisan", "queue:work"]
+    depends_on:
+      - redis
+      - php
+
+
+
+  upload:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: upload-service
+    volumes:
+      - ./:/var/www
+    networks:
+      - app-network
+    depends_on:
+      - redis
+    restart: unless-stopped
+
 networks:
-    sail:
-        driver: bridge
-volumes:
-    sail-redis:
-        driver: local
+  app-network:
+    driver: bridge

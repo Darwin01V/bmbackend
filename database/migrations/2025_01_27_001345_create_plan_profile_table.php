@@ -16,11 +16,9 @@ return new class extends Migration
             $table->date('date_start');
             $table->date('date_end');
             $table->boolean('active')->default(true);
-            $table->unsignedInteger('profile_id');
             $table->unsignedInteger('plan_id');
             $table->timestamps();
 
-            $table->foreign('profile_id')->references('id')->on('profile');
             $table->foreign('plan_id')->references('id')->on('plans');
         });
     }

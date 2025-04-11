@@ -16,6 +16,7 @@ class Ventas extends Model
         'amount',
         'plan_id',
         'user_id',
+        'estado'
     ];
 
     public function user(){

@@ -16,7 +16,7 @@ class ArtistasController extends Controller
     }
     public function getArtistas(){
         try {
-            $data = $this->artista->all();
+            $data = $this->artista->paginate(5);
             
             return $this->response("Datos obtenidos", 200, false, $data);
         } catch (\Exception $e) {
@@ -79,6 +79,17 @@ class ArtistasController extends Controller
             return $this->response("Artista {$status} correctamente", 200, false);
         } catch (\Exception $e) {
             return $this->response("Error en el servicio: " . $e->getMessage(), 500, true);
+        }
+    }
+
+    // Rutas publics
+    public function getArtistasActive(){
+        try {
+            $data = $this->artista->where('active', 1)->get();
+            
+            return $this->response("Datos obtenidos", 200, false, $data);
+        } catch (\Exception $e) {
+            return $this->response("Error al obtener los datos ". $e->getMessage(), 500, true);
         }
     }
 }

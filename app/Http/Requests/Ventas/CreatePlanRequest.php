@@ -23,15 +23,16 @@ class CreatePlanRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'description' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
             'time' => ['required', 'integer'],
             'type' => ['required', 'string'],
-            'price' => ['required', 'decimal:8,2'],
+            'price' => ['required', 'decimal:0,10'],
             'discount_percentage' => ['required', 'integer'],
             'unlimited' => ['required', 'boolean'],
             'n_audios' => ['required', 'integer'],
             'n_videos' => ['required', 'integer'] ,
             'active' => ['required', 'boolean'],
+            'enlace' => ['required', 'string'],
         ];
     }
 }

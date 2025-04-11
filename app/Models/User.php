@@ -3,15 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Contracts\Auth\CanResetPassword; // <-- Esta es una interfaz
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait; // <-- Este es el trait que debes usar
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, CanResetPasswordTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -67,6 +70,11 @@ class User extends Authenticatable implements JWTSubject
 
     // Relaciones
 
+    public function perfilplan()
+    {
+        return $this->hasOne(PlanPerfil::class);
+    }
+
     public function perfil()
     {
         return $this->hasOne(Perfil::class);
@@ -88,6 +96,11 @@ class User extends Authenticatable implements JWTSubject
 
     public function ventas(){
         return $this->hasMany(Ventas::class, 'user_id');
+    }
+
+    public function perfilCreador()
+    {
+        return $this->hasOne(PerfilCreador::class, 'user_id');
     }
 
     

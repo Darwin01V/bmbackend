@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Seguridad;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\CreateAdminUserRequest;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Perfil;
+use App\Models\Rol;
 use App\Models\Roles;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class UsuarioController extends Controller
 {   
@@ -23,10 +26,25 @@ class UsuarioController extends Controller
 
     public function getUsers(){
         try {
-            $data = $this->user->with(['perfil','roles'])->get();
+            $user = auth()->user();
+            $data = $this->user->with(['roles'])->whereHas('roles', function ($query) {
+                $query->where('name', 'administrador');
+            })
+            ->where('id', '!=', $user->id)
+            ->where('root', 0)
+            ->paginate(10);
             return $this->response("Datos obtendios", 200, false, $data);
         } catch (\Exception $e) {
             return $this->response("Error en el servicio" . $e->getMessage(), 200, false);
+        }
+    }
+
+    public function getRoles(){
+        try {
+            $data = Rol::where('active',1)->get();
+            return $this->response("Datos obtendios", 200, false, $data);
+        } catch (\Throwable $th) {
+            return $this->response("Error en el servicio", 200, false);
         }
     }
 
@@ -54,36 +72,31 @@ class UsuarioController extends Controller
 
             $data = $request->validated();
 
-            $role = Roles::find($data['roles']['id']);
-            if (!$role) {
-                return $this->response("El rol no existe", 400, true);
-            }
-
             $user = User::create([
-                'email' => $data['user']['email'],
-                'password' => bcrypt($data['user']['password']),
-                'root' => $data['user']['root'] ?? false,
-                'active' => $data['user']['active'] ?? true,
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+                'root' => false,
+                'active' => true,
             ]);
 
-            $perfil = new Perfil([
-                'path_profile' => $data['perfil']['path_profile'] ?? null,
-                'first_name' => $data['perfil']['first_name'],
-                'last_name' => $data['perfil']['last_name'],
-            ]);
+            // $perfil = new Perfil([
+            //     'path_profile' => "",
+            //     'first_name' => $data['perfil']['first_name'],
+            //     'last_name' => $data['perfil']['last_name'],
+            // ]);
 
-            $user->perfil()->save($perfil);
+            // $user->perfil()->save($perfil);
 
-            $user->roles()->attach($data['roles']['id']);
+            $user->roles()->attach(1);
 
             DB::commit();
 
-            $data = $user->load('perfil', 'roles');
+            $data = $user->load('roles');
             return $this->response("Usuario creado con exito", 200, false, $data);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->response("Error en el servicio" . $e->getMessage(), 200, false);
+            return $this->response("Error en el servicio" . $e->getMessage(), 500, false);
         }
     }
 
@@ -99,33 +112,15 @@ class UsuarioController extends Controller
                 return $this->response("Usuario no encontrado", 404, true);
             }
 
-            // Verificar que el rol exista
-            $role = Roles::find($data['roles']['id']);
-            if (!$role) {
-                return $this->response("El rol no existe", 400, true);
-            }
-
             // Actualizar usuario
             $user->update([
-                'email' => $data['user']['email'],
-                'root' => $data['user']['root'] ?? false,
-                'active' => $data['user']['active'] ?? true,
+                'email' => $data['email'],
             ]);
 
             // Si se envía una nueva contraseña, actualizarla
-            if (!empty($data['user']['password'])) {
-                $user->update(['password' => bcrypt($data['user']['password'])]);
+            if (!empty($data['password'])) {
+                $user->update(['password' => bcrypt($data['password'])]);
             }
-
-            // Actualizar perfil
-            $user->perfil()->update([
-                'path_profile' => $data['perfil']['path_profile'] ?? null,
-                'first_name' => $data['perfil']['first_name'],
-                'last_name' => $data['perfil']['last_name'],
-            ]);
-
-            // Actualizar rol (asumimos que es una relación muchos a muchos)
-            $user->roles()->sync([$data['roles']['id']]);
 
             DB::commit();
 
@@ -177,4 +172,51 @@ class UsuarioController extends Controller
             return $this->response("Error en el servicio: " . $e->getMessage(), 500, true);
         }
     }
+
+    public function adminExists()
+    {
+        $exists = User::where('root', true)->exists(); // o el campo que uses para identificar admin
+        return $this->response("Respuesta de consulta", 200, false, $exists);
+    }
+
+
+    public function createUserAdmin(CreateAdminUserRequest $request){
+        try {
+            DB::beginTransaction();
+            $data = $request->validated();
+
+            $exists = User::where('root', true)->exists(); 
+            if($exists){
+                return $this->response("Ya existe un usuario administrador", 400, false);
+            }
+
+            $user = User::create([
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+                'root' => true,
+                'active' => true,
+            ]);
+
+            $perfil = new Perfil([
+                'path_profile' => "",
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+            ]);
+
+            $user->perfil()->save($perfil);
+
+            $user->roles()->attach(1);
+
+            DB::commit();
+
+            $data = $user->load('roles');
+            return $this->response("Usuario creado con exito", 200, false, $data);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error al crear el usuario administrador: " . $e->getMessage());
+            return $this->response("Error en el servicio", 500, false);
+        }
+    }
+
 }

@@ -16,7 +16,17 @@ class PlanesController extends Controller
     }
     public function getPlanes(){
         try {
-            $data = $this->planes->all();
+            $data = $this->planes->paginate(15);
+
+            return $this->response("Datos obtenidos", 200, false, $data);
+        } catch (\Exception $e) {
+            return $this->response("Error al obtener los planes" . $e->getMessage(), 500, true, null, );
+        }
+    }
+
+    public function getPlan(int $id){
+        try {
+            $data = $this->planes->find($id);
 
             return $this->response("Datos obtenidos", 200, false, $data);
         } catch (\Exception $e) {
@@ -53,6 +63,7 @@ class PlanesController extends Controller
             if (!$plan) {
                 return $this->response("Plan no encontrado", 404, true);
             }
+            
             $data_request = $request->validated();    
             $plan->update($data_request);
             return $this->response("Plan actualizado con éxito", 200, false, $plan);
@@ -74,6 +85,17 @@ class PlanesController extends Controller
             return $this->response("Plan no encontrado", 404, true, null, );
         } catch (\Exception $e) {
             return $this->response("Error al modificar el estado del plan" . $e->getMessage(), 500, true, null, );
+        }
+    }
+
+    // Publics
+    public function getPlanesActive(){
+        try {
+            $data = $this->planes->where('active', 1)->get();
+
+            return $this->response("Datos obtenidos", 200, false, $data);
+        } catch (\Exception $e) {
+            return $this->response("Error al obtener los planes" . $e->getMessage(), 500, true, null, );
         }
     }
 }

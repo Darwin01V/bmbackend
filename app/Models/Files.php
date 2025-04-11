@@ -26,6 +26,10 @@ class Files extends Model
         'user_id'
     ];
 
+    protected $casts = [
+        'slider_new' => 'boolean',
+    ];
+
     public function artist()
     {
         return $this->belongsTo(Artistas::class, 'artists_id');
@@ -38,6 +42,6 @@ class Files extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'users_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

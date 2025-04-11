@@ -22,15 +22,17 @@ class CreateFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'bpm' => ['required', 'string'],
-            'version' => ['required', 'string'],
-            'type' => ['required', 'string'],
-            'path' => ['required', 'string'],
-            'path_preview' => ['required', 'string'],
-            'slider_new' => ['required', 'boolean'],
-            'artists_id' => ['required', 'integer'],
-            'genres_id' => ['required', 'integer'],
+            // Validación para cada elemento del array
+            'files' => ['required','array'],
+            'files.*.name' => ['required', 'string'],
+            'files.*.bpm' => ['required', 'string'],
+            'files.*.file' => ['required', 'file', 'max:100000'],
+            'files.*.preview' => ['required', 'file', 'max:100000'],
+            'files.*.version' => ['required', 'integer'],
+            'files.*.type' => ['required', 'string'],
+            'files.*.slider_new' => ['required', 'string'],
+            'files.*.artists_id' => ['required', 'integer'],
+            'files.*.genres_id' => ['required', 'integer'],
         ];
     }
 }

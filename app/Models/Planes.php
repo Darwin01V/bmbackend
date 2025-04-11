@@ -21,7 +21,8 @@ class Planes extends Model
         'unlimited',
         'n_audios',
         'n_videos',
-        'active'
+        'active',
+        'enlace'
     ];
 
     

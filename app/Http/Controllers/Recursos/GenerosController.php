@@ -16,7 +16,7 @@ class GenerosController extends Controller
     }
     public function getGeneros(){
         try {
-            $data = $this->generos->all();
+            $data = $this->generos->paginate(15);
             
             return $this->response("Datos obtenidos", 200, false, $data);
         } catch (\Exception $e) {
@@ -79,6 +79,17 @@ class GenerosController extends Controller
             return $this->response("Genero {$status} correctamente", 200, false);
         } catch (\Exception $e) {
             return $this->response("Error en el servicio: " . $e->getMessage(), 500, true);
+        }
+    }
+
+    // Public
+    public function getGenerosActive(){
+        try {
+            $data = $this->generos->where('active', 1)->get();
+            
+            return $this->response("Datos obtenidos", 200, false, $data);
+        } catch (\Exception $e) {
+            return $this->response("Error al obtener los datos ". $e->getMessage(), 500, true);
         }
     }
 }

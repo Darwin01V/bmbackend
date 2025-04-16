@@ -88,13 +88,33 @@ class ClientesController extends Controller
     
             $user->save();
 
-            $user->perfil()->updateOrCreate(
-                ['user_id' => $user->id], // Condición para encontrar el perfil
-                [
-                    "first_name" => $data['name'] ?? '',
-                    "last_name" => $data['lastname'] ?? '',
-                ]
-            );
+            if (isset($data['name']) || isset($data['lastname'])) {
+                $user->perfil()->updateOrCreate(
+                    ['user_id' => $user->id], // Condición para encontrar el perfil
+                    [
+                        "first_name" => $data['name'] ?? '',
+                        "last_name" => $data['lastname'] ?? '',
+                    ]
+                );
+            }
+
+            DB::commit();
+    
+            $user->load('perfil', 'roles');
+    
+            return $this->response("Usuario actualizado con éxito", 200, false, $user);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->response("Error en el servicio: " . $e->getMessage(), 500, true);
+        }
+    }
+
+    public function updateClientePerfil(UpdateClienteRequest $request){
+        try {
+            DB::beginTransaction();
+            $user = auth()->user();
+            $user = User::findOrFail($user->id);
+            $data = $request->validated();
     
             DB::commit();
     

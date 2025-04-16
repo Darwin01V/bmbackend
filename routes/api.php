@@ -152,6 +152,8 @@ Route::group(['prefix' => 'v1'], function () {
 
             Route::group(['prefix' => 'clientes'], function () {
                 Route::get('/contador', [ClientesController::class, 'contadorDescargas']);
+                Route::put('/usuario', [ClientesController::class, 'updateCliente']);
+                Route::put('/cliente-profile', [ClientesController::class, 'updateClientePerfil']);
             });
 
         });

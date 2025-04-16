@@ -357,6 +357,7 @@ class FilesController extends Controller
                     'title' => $file->name,
                     'version' => $file->version,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
+                    'path_image' => url('storage/uploads/' . basename($file->path_image)),
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
                 ];
@@ -400,6 +401,7 @@ class FilesController extends Controller
                     'id' => $file->id,
                     'title' => $file->name,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
+                    'path_image' => url('storage/uploads/' . basename($file->path_image)),
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
                 ];
@@ -427,6 +429,7 @@ class FilesController extends Controller
                     'id' => $file->id,
                     'title' => $file->name,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
+                    'path_image' => url('storage/uploads/' . basename($file->path_image)),
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
                     'downloads' => $file->n_downloads, // Mostrar número de descargas
@@ -455,6 +458,7 @@ class FilesController extends Controller
                     'id' => $file->id,
                     'title' => $file->name,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
+                    'path_image' => url('storage/uploads/' . basename($file->path_image)),
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
                     'downloads' => $file->n_downloads, // Mostrar número de descargas

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Clientes;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 
@@ -25,13 +26,14 @@ class UpdateClienteRequest extends FormRequest
     {
         return [
             'email' => [
+                'sometimes',
                 'nullable',
                 'email:filter',
-                Rule::unique('users', 'email')->ignore($this->route('id')) // Ignora el usuario actual
+                Rule::unique('users', 'email')->ignore(Auth::id()) 
             ],
-            'password' => ['nullable', 'min:6','string'],
-            'name' => ['nullable', 'string'],
-            'lastname' => ['nullable', 'string'],
+            'password' => ['sometimes','nullable', 'min:6','string'],
+            'name' => ['sometimes','nullable', 'string'],
+            'lastname' => ['sometimes','nullable', 'string'],
         ];
     }
 }

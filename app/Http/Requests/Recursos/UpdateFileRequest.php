@@ -24,6 +24,7 @@ class UpdateFileRequest extends FormRequest
         return [
             "name" => ["nullable", "string", "max:255"],
             "bpm" => ["nullable", "integer", "max:255"],
+            "image" => ['nullable', 'image', 'max:100000'],
             "slider_new" => ["nullable", "boolean", "max:255"],
             "artists_id"=> ["nullable", "integer", "max:255"],
             "genres_id" => ["nullable", "integer", "max:255"],

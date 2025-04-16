@@ -27,6 +27,7 @@ class CreateFileRequest extends FormRequest
             'files.*.name' => ['required', 'string'],
             'files.*.bpm' => ['required', 'string'],
             'files.*.file' => ['required', 'file', 'max:100000'],
+            'files.*.path_image' => ['required', 'file', 'max:100000'],
             'files.*.preview' => ['required', 'file', 'max:100000'],
             'files.*.version' => ['required', 'integer'],
             'files.*.type' => ['required', 'string'],

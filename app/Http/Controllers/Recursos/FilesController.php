@@ -8,6 +8,7 @@ use App\Http\Requests\Recursos\FileStatusRequest;
 use App\Http\Requests\Recursos\UpdateFileRequest;
 use App\Models\Files;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -72,6 +73,7 @@ class FilesController extends Controller
 
                     $path = $file['file']->store('public/uploads'); 
                     $path_preview = $file['preview']->store('public/uploads'); 
+                    $path_image = $file['path_image']->store('public/uploads'); 
                     $uploadedFiles[] = $path; 
                     $uploadedFiles_p[] = $path_preview; 
                     $slider_new = isset($file['slider_new']) ? (int) $file['slider_new'] : 0;
@@ -79,6 +81,7 @@ class FilesController extends Controller
                     Files::create([
                         'path' => $path,
                         'path_preview' => $path_preview,
+                        'path_image' => $path_image,
                         'name' => $file['name'] ?? null,
                         'version' => $file['version'] ?? null,
                         'bpm' => $file['bpm'] ?? null,
@@ -165,7 +168,7 @@ class FilesController extends Controller
 
             if($file){
                 
-                if($plan_perfil->active){
+                if($plan_perfil?->active || empty($plan_perfil)){
                     if(Str::startsWith($file->type, 'audio/')){
                         if($plan->type == 'A'){
                             if(!$plan->unlimited){
@@ -245,6 +248,17 @@ class FilesController extends Controller
             if (!$file) {
                 return $this->response("Recurso no encontrado", 404, true);
             }
+
+            if(isset($data['image'])) {
+                $path_image = $data['image']->store('public/uploads'); 
+                if(isset($file->path_image)) {
+                    $oldPath = storage_path('app/' . $file->path_image);
+                    if (file_exists($oldPath)) {
+                        Storage::delete($oldPath);
+                    }
+                }
+                $data['path_image'] = $path_image;
+            }
     
             $file->update($data);
     
@@ -284,12 +298,16 @@ class FilesController extends Controller
                 $path_preview = $file->path_preview;
                 $path = $file->path;
 
-                if (file_exists($path_preview)) {
-                    unlink($path_preview);
+                $storagePathPreview = storage_path('app/' . $path_preview);
+                $storagePath = storage_path('app/' . $path);
+
+                // Eliminar archivos si existen
+                if (File::exists($storagePathPreview)) {
+                    File::delete($storagePathPreview);
                 }
-    
-                if (file_exists($path)) {
-                    unlink($path);
+
+                if (File::exists($storagePath)) {
+                    File::delete($storagePath);
                 }
     
 
@@ -337,6 +355,7 @@ class FilesController extends Controller
                 return [
                     'id' => $file->id,
                     'title' => $file->name,
+                    'version' => $file->version,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
@@ -447,6 +466,28 @@ class FilesController extends Controller
             return $this->response("Error al obtener los datos: " . $e->getMessage(), 500, true);
         }
     }
+
+    public function getFilesSliderNuevosLanzamientos(){
+        try {
+            $data = $this->file
+                        ->where('active', 1)
+                        ->where('status', 'A')
+                        ->where('slider_new', true)
+                        ->get();
+    
+            $data->transform(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'title' => $file->name,
+                    'type' => $file->type,
+                ];
+            });
+    
+            return $this->response("Datos obtenidos", 200, false, $data);
+        } catch (\Exception $e) {
+            return $this->response("Error al obtener los datos: " . $e->getMessage(), 500, true);
+        }
+    }  
 
 
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ConfigUpdateRequest;
 use App\Models\Configuration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ConfigurationController extends Controller
@@ -28,6 +29,7 @@ class ConfigurationController extends Controller
 
             return $this->response("Configuracion editada", 200, false);
         } catch (\Exception $e) {
+            Log::error('Error updating configuration: ' . $e->getMessage());
             return $this->response("Configuracion error", 500, true);
         }
     }

@@ -18,6 +18,7 @@ class Files extends Model
         'type',
         'path',
         'path_preview',
+        'path_image',
         'n_downloads',
         'active',
         'slider_new',

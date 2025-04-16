@@ -24,33 +24,43 @@ class DashboardController extends Controller
             }
 
             // Ventas totales diarias
-            $ventas_diarias = 0;
-            $planes_venta_diaria = Ventas::where('estado', 'C')->whereDate('date_shop', now())->get();
-            foreach ($planes_venta_diaria as $plan) {
-                $ventas_diarias += $plan->amount;
-            }
+            $ventas_diarias = number_format(
+                Ventas::where('estado', 'C')
+                    ->whereDate('date_shop', now())
+                    ->sum('amount'),
+                4,
+                '.',
+                ''
+            );
 
-            // Ventas totales Pendientes
-            $ventas_pendientes = 0;
-            $planes_venta_pendientes = Ventas::where('estado', 'P')->get();
-            foreach ($planes_venta_pendientes as $plan) {
-                $ventas_pendientes += $plan->amount;
-            }
+            // Ventas totales pendientes
+            $ventas_pendientes = number_format(
+                Ventas::where('estado', 'P')
+                    ->sum('amount'),
+                4,
+                '.',
+                ''
+            );
 
             // Ventas del mes
-            $ventas_mes = 0;
-            $planes_venta_mes = Ventas::where('estado', 'C')->whereMonth('date_shop', now()->month)->get();
-            foreach ($planes_venta_mes as $plan) {
-                $ventas_mes += $plan->amount;
-            }
+            $ventas_mes = number_format(
+                Ventas::where('estado', 'C')
+                    ->whereMonth('date_shop', now()->month)
+                    ->sum('amount'),
+                4,
+                '.',
+                ''
+            );
 
             $clientes_con_plan = PlanPerfil::where('active', true)->get()->count();
             $planes = Planes::where('active', true)->count();
             $descargas_totales = 0;
             $files= Files::all();
+
             foreach ($files as $file) {
                 $descargas_totales += $file->downloads;
             }
+            
             $creadores = PerfilCreador::all()->count();
 
             $data = [

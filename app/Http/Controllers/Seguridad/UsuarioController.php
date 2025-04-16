@@ -179,7 +179,6 @@ class UsuarioController extends Controller
         return $this->response("Respuesta de consulta", 200, false, $exists);
     }
 
-
     public function createUserAdmin(CreateAdminUserRequest $request){
         try {
             DB::beginTransaction();
@@ -218,5 +217,6 @@ class UsuarioController extends Controller
             return $this->response("Error en el servicio", 500, false);
         }
     }
+
 
 }

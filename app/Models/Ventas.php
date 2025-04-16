@@ -19,6 +19,10 @@ class Ventas extends Model
         'estado'
     ];
 
+    protected $casts = [
+        'amount' => 'float',
+    ];
+
     public function user(){
         return $this->belongsTo(User::class);
     }

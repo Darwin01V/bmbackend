@@ -126,6 +126,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('/files/audios_destact', [FilesController::class, 'getFilesAudiosDesct']);
             Route::get('/files/videos', [FilesController::class, 'getFilesVideo']);
             Route::get('/files/videos_destact', [FilesController::class, 'getFilesVideoDesct']);
+            Route::get('/files/slider-new', [FilesController::class, 'getFilesSliderNuevosLanzamientos']);
 
             Route::get('/artistas', [ArtistasController::class, 'getArtistasActive']);
             Route::get('/generos', [GenerosController::class, 'getGenerosActive']);

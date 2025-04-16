@@ -71,11 +71,11 @@ class ClientesController extends Controller
         }
     }
 
-    public function updateCliente(UpdateClienteRequest $request, $id){
+    public function updateCliente(UpdateClienteRequest $request){
         try {
             DB::beginTransaction();
-
-            $user = User::findOrFail($id);
+            $user = auth()->user();
+            $user = User::findOrFail($user->id);
             $data = $request->validated();
     
             $user->fill([

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Recursos;
 
+use App\Events\NuevaDescarga;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recursos\CreateFileRequest;
 use App\Http\Requests\Recursos\FileStatusRequest;
@@ -179,6 +180,14 @@ class FilesController extends Controller
                                         $file->n_downloads = $file->n_downloads + 1;
                                         $file->save();
                                         $plan_count->save();
+                                        
+                                        $user_c= $file->user;
+                                        $rol_user= $user_c->roles;
+                                        if($rol_user[0]->name === 'creador'){
+                                            $creador = $user_c->perfilCreador;
+                                            event(new NuevaDescarga($creador));
+                                        }
+
                                         return $this->response("OK", 200, true);
                                     }
     
@@ -189,6 +198,13 @@ class FilesController extends Controller
                                 if (Storage::exists($path)) {
                                     $file->n_downloads = $file->n_downloads + 1;
                                     $file->save();
+                                    
+                                    $user_c= $file->user;
+                                    $rol_user= $user_c->roles;
+                                    if($rol_user[0]->name === 'creador'){
+                                        $creador = $user_c->perfilCreador;
+                                        event(new NuevaDescarga($creador));
+                                    }
                                     return $this->response("OK", 200, true);
                                 }
                             }
@@ -205,6 +221,13 @@ class FilesController extends Controller
                                         $file->n_downloads = $file->n_downloads + 1;
                                         $file->save();
                                         $plan_count->save();
+
+                                        $user_c= $file->user;
+                                        $rol_user= $user_c->roles;
+                                        if($rol_user[0]->name === 'creador'){
+                                            $creador = $user_c->perfilCreador;
+                                            event(new NuevaDescarga($creador));
+                                        }
                                         return $this->response("OK", 200, true);
                                     }
     
@@ -215,6 +238,13 @@ class FilesController extends Controller
                                 if (Storage::exists($path)) {
                                     $file->n_downloads = $file->n_downloads + 1;
                                     $file->save();
+                                    
+                                    $user_c= $file->user;
+                                    $rol_user= $user_c->roles;
+                                    if($rol_user[0]->name === 'creador'){
+                                        $creador = $user_c->perfilCreador;
+                                        event(new NuevaDescarga($creador));
+                                    }
                                     return $this->response("OK", 200, true);
                                 }
                             }
@@ -357,7 +387,7 @@ class FilesController extends Controller
                     'title' => $file->name,
                     'version' => $file->version,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
-                    'path_image' => url('storage/uploads/' . basename($file->path_image)),
+                    'path_image' => $file->path_image ? url('storage/uploads/' . basename($file->path_image)) : null,
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
                 ];
@@ -400,8 +430,9 @@ class FilesController extends Controller
                 return [
                     'id' => $file->id,
                     'title' => $file->name,
+                    'version' => $file->version,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
-                    'path_image' => url('storage/uploads/' . basename($file->path_image)),
+                    'path_image' => $file->path_image ? url('storage/uploads/' . basename($file->path_image)) : null,
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
                 ];
@@ -428,8 +459,9 @@ class FilesController extends Controller
                 return [
                     'id' => $file->id,
                     'title' => $file->name,
+                    'version' => $file->version,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
-                    'path_image' => url('storage/uploads/' . basename($file->path_image)),
+                    'path_image' => $file->path_image ? url('storage/uploads/' . basename($file->path_image)) : null,
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
                     'downloads' => $file->n_downloads, // Mostrar número de descargas
@@ -457,8 +489,9 @@ class FilesController extends Controller
                 return [
                     'id' => $file->id,
                     'title' => $file->name,
+                    'version' => $file->version,
                     'path_preview' => url('storage/uploads/' . basename($file->path_preview)),
-                    'path_image' => url('storage/uploads/' . basename($file->path_image)),
+                    'path_image' => $file->path_image ? url('storage/uploads/' . basename($file->path_image)) : null,
                     'artist' => $file->artist->name ?? null,
                     'genre' => $file->genre->name ?? null,
                     'downloads' => $file->n_downloads, // Mostrar número de descargas
@@ -470,7 +503,7 @@ class FilesController extends Controller
             return $this->response("Error al obtener los datos: " . $e->getMessage(), 500, true);
         }
     }
-
+    
     public function getFilesSliderNuevosLanzamientos(){
         try {
             $data = $this->file
@@ -484,6 +517,7 @@ class FilesController extends Controller
                     'id' => $file->id,
                     'title' => $file->name,
                     'type' => $file->type,
+                    'image' => $file->path_image ? url('storage/uploads/' . basename($file->path_image)) : null,
                 ];
             });
     
@@ -492,6 +526,5 @@ class FilesController extends Controller
             return $this->response("Error al obtener los datos: " . $e->getMessage(), 500, true);
         }
     }  
-
 
 }

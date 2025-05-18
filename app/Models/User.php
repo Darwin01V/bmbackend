@@ -103,5 +103,11 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         return $this->hasOne(PerfilCreador::class, 'user_id');
     }
 
+    public function MontoCreador()
+    {
+        return $this->hasOne(MontoCreador::class, 'creador_id');
+    }
+
+
     
 }

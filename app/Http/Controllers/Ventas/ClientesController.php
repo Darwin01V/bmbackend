@@ -71,6 +71,44 @@ class ClientesController extends Controller
         }
     }
 
+    public function updateClienteAdmin(UpdateClienteRequest $request){
+        try {
+            DB::beginTransaction();
+            $user = auth()->user();
+            $user = User::findOrFail($user->id);
+            $data = $request->validated();
+    
+            $user->fill([
+                'email' => $data['email'] ?? $user->email,
+            ]);
+    
+            if (!empty($data['password'])) {
+                $user->password = bcrypt($data['password']);
+            }
+    
+            $user->save();
+
+            if (isset($data['name']) || isset($data['lastname'])) {
+                $user->perfil()->updateOrCreate(
+                    ['user_id' => $user->id], // Condición para encontrar el perfil
+                    [
+                        "first_name" => $data['name'] ?? '',
+                        "last_name" => $data['lastname'] ?? '',
+                    ]
+                );
+            }
+
+            DB::commit();
+    
+            $user->load('perfil', 'roles');
+    
+            return $this->response("Usuario actualizado con éxito", 200, false, $user);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->response("Error en el servicio: " . $e->getMessage(), 500, true);
+        }
+    }
+
     public function updateCliente(UpdateClienteRequest $request){
         try {
             DB::beginTransaction();
@@ -149,13 +187,12 @@ class ClientesController extends Controller
         try {
             $user = auth()->user();
             $plan = $user->perfilplan?->plan_count?->first(); // o suscripción activa
-    
             $data = [
                 "restante" => 0
             ];
     
             if (!$plan) {
-                return $this->response("No tienes un plan activo", 404, true,$data);
+                return $this->response("No tienes un plan activo", 200, true,$data);
             }
 
             if($plan->unlimited){

@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\NuevaDescarga;
 use App\Events\PagoRecibido;
 use App\Listeners\AsignarPlanAlUsuario;
+use App\Listeners\CalcularMontoNuevo;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -20,10 +22,12 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-
         PagoRecibido::class => [
             AsignarPlanAlUsuario::class,
         ],
+        NuevaDescarga::class => [
+            CalcularMontoNuevo::class
+        ]
     ];
 
     /**

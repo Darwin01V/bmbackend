@@ -28,7 +28,7 @@ class DashboardController extends Controller
                 Ventas::where('estado', 'C')
                     ->whereDate('date_shop', now())
                     ->sum('amount'),
-                4,
+                2,
                 '.',
                 ''
             );
@@ -37,7 +37,7 @@ class DashboardController extends Controller
             $ventas_pendientes = number_format(
                 Ventas::where('estado', 'P')
                     ->sum('amount'),
-                4,
+                2,
                 '.',
                 ''
             );
@@ -47,7 +47,7 @@ class DashboardController extends Controller
                 Ventas::where('estado', 'C')
                     ->whereMonth('date_shop', now()->month)
                     ->sum('amount'),
-                4,
+                2,
                 '.',
                 ''
             );

@@ -203,6 +203,11 @@ class AuthController extends Controller
             $request->validate(['email' => 'required|email']);
 
             $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                return $this->response("No existe el usuario", 404, true);
+            }
+
             $rol = $user->roles()->first();
             
             if ($rol->name === "administrador" || $rol->name === "creador") {
